@@ -23,10 +23,10 @@ def file_exists_can_be_overwritten(
     file_exists = True
 
     if never_overwrite:
-        return file_exists, "O"
+        return file_exists, "X"
     
     overwrite = input(
-        f"This file exists already:\n{output_filename}\nAllow overwrite?\nNo (default) (N)\nYes (Y)\nOverwrite all (A)\nNever overwrite (O)\n"
+        f"This file exists already:\n{output_filename}\nAllow overwrite?\nNo (default) (N)\nYes (Y)\nOverwrite all (A)\nNever overwrite (X)\n"
     ) or "N"
 
     if overwrite.upper() == "Y":
@@ -38,10 +38,10 @@ def file_exists_can_be_overwritten(
     if overwrite.upper() == "A":
         return file_exists, "A"
 
-    if overwrite.upper() == "O":
-        return file_exists, "O"
+    if overwrite.upper() == "X":
+        return file_exists, "X"
 
-    return file_exists, "Y"
+    return file_exists, "N" # Won't overwrite for some unexpected response. Could do "while overwrite not in acceptable_responses"  instead, but will leave as-is.
 
 
 def process_reorder(source: str, output_filename: str) -> None:
@@ -69,9 +69,8 @@ def process_reorder(source: str, output_filename: str) -> None:
 
 
 def get_append_name() -> str:
-    """Prompts for a value to append to the original file name."""
+    """Prompts for a value to append to the original file name for multiple file processing."""
 
-    # multiple file processing
     default_append_name = "-updated"
     append_name = input(f"Choose value to append to file names.\nThe default value is '{default_append_name}'. ")
     append_name = append_name or default_append_name
@@ -114,7 +113,7 @@ def main() -> None:
         title="Choose a destination directory for the files"
     )
 
-    # TODO: this "if" check seems a bit redundant because it is repeated later. But assigning append_name in the for-loop would make for a repetitive UX. And ommitting the "if" flow while still assigning append_name would be confusing in the case of just one PDF, as the app will later request a name that will not take append_name into account.
+    # Gonna leave this "if" check as is. It seems a bit redundant because it is repeated later. But assigning append_name in the for-loop would make for a repetitive UX. Ommitting the "if" flow and always assigning append_name would be confusing in the case of just one PDF, as the app will later request a name that will not take append_name into account.
     if len_of_sources > 1:
         append_name = get_append_name()
 
@@ -145,14 +144,19 @@ def main() -> None:
             print(f"Skipping file:\n{output_filename}\n")
             continue
 
-        if file_exists and can_overwrite == "O":
+        if file_exists and can_overwrite == "X":
             never_overwrite = True
             print(f"Skipping file:\n{output_filename}\n")
+            continue
+
+        if file_exists and can_overwrite == "Y":
+            process_reorder(source, output_filename)
             continue
 
         if file_exists and can_overwrite == "A":
             always_overwrite = True
             process_reorder(source, output_filename)
+            continue
 
 
 main()
