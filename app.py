@@ -15,10 +15,7 @@ from tkinter import filedialog as fd
 def file_exists_can_be_overwritten(
     output_filename: str, never_overwrite: Optional[bool]
 ) -> tuple[bool, str]:
-    """If the file exists, prompts user to allow overwriting.
-    
-    Bool value indicates existence of the file. String indicates overwrite permission.
-    """
+    """Checks if the file exists and prompts the user to allow overwriting."""
 
     if not Path(output_filename).exists():
         return False, "Y"
@@ -72,7 +69,7 @@ def process_reorder(source: str, output_filename: str) -> None:
 
 
 def get_append_name() -> str:
-    """Get name-related values for output files."""
+    """Prompts for a value to append to the original file name."""
 
     # multiple file processing
     default_append_name = "-updated"
@@ -83,7 +80,7 @@ def get_append_name() -> str:
 
 
 def get_output_filename(source: str) -> str:
-    """Get name-related values for output files."""
+    """Prompts for an output file name."""
 
     last_forward_slash = source.rfind("/")
     last_period = source.rfind(".")
