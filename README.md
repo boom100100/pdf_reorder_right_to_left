@@ -12,3 +12,13 @@
 
 # Run
 In the pipenv shell, run `python app.py`.
+
+# Demo
+
+Before:
+
+![Side-by-side PDF pages out of order for right-to-left reading.](<Screenshot 2025-11-12 at 2.20.47 PM.png>)
+
+After:
+
+![Side-by-side PDF pages in proper order for right-to-left reading.](<Screenshot 2025-11-12 at 2.17.43 PM.png>)
