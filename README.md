@@ -1,4 +1,9 @@
 # PDF Reorderer
+Rearranges PDF pages for right-to-left (RTL) reading.
+
+## Features
+- Rearrange pages for one or multiple PDFs at a time.
+- Overwriting an existing PDF (or many) is optional.
 
 ## Setup
 ### MacOS
