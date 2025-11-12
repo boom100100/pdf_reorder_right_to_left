@@ -23,10 +23,10 @@ def file_exists_can_be_overwritten(
     file_exists = True
 
     if never_overwrite:
-        return file_exists, "O"
+        return file_exists, "X"
     
     overwrite = input(
-        f"This file exists already:\n{output_filename}\nAllow overwrite?\nNo (default) (N)\nYes (Y)\nOverwrite all (A)\nNever overwrite (O)\n"
+        f"This file exists already:\n{output_filename}\nAllow overwrite?\nNo (default) (N)\nYes (Y)\nOverwrite all (A)\nNever overwrite (X)\n"
     ) or "N"
 
     if overwrite.upper() == "Y":
@@ -38,8 +38,8 @@ def file_exists_can_be_overwritten(
     if overwrite.upper() == "A":
         return file_exists, "A"
 
-    if overwrite.upper() == "O":
-        return file_exists, "O"
+    if overwrite.upper() == "X":
+        return file_exists, "X"
 
     return file_exists, "N" # Won't overwrite for some unexpected response. Could do "while overwrite not in acceptable_responses"  instead, but will leave as-is.
 
@@ -144,14 +144,19 @@ def main() -> None:
             print(f"Skipping file:\n{output_filename}\n")
             continue
 
-        if file_exists and can_overwrite == "O":
+        if file_exists and can_overwrite == "X":
             never_overwrite = True
             print(f"Skipping file:\n{output_filename}\n")
+            continue
+
+        if file_exists and can_overwrite == "Y":
+            process_reorder(source, output_filename)
             continue
 
         if file_exists and can_overwrite == "A":
             always_overwrite = True
             process_reorder(source, output_filename)
+            continue
 
 
 main()
