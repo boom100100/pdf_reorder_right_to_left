@@ -9,3 +9,6 @@
 
     pipenv shell
     pipenv install --python 3.13
+
+# Run
+In the pipenv shell, run `python app.py`.
