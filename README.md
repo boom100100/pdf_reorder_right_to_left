@@ -7,7 +7,8 @@ Rearranges PDF pages for right-to-left (RTL) reading.
 
 ## Setup
 ### MacOS
-    cd projectDir
+    git clone https://github.com/boom100100/pdf_reorder_right_to_left.git pdf_right_to_left
+    cd pdf_right_to_left
     brew install python@3.13
     brew install python-tk
     brew install pipenv
