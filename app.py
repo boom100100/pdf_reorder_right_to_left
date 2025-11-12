@@ -5,11 +5,51 @@ Use case: a manga PDF on two-page view shows the pages on the wrong side.
 
 The fix here is to move the even page behind the following odd page.
 """
+from pathlib import Path
+from typing import Optional
 
 from PyPDF2 import PdfReader, PdfWriter
 from tkinter import filedialog as fd
 
-def process_reorder(source, output_filename):
+
+def file_exists_can_be_overwritten(
+    output_filename: str, never_overwrite: Optional[bool]
+) -> tuple[bool, str]:
+    """If the file exists, prompts user to allow overwriting.
+    
+    Bool value indicates existence of the file. String indicates overwrite permission.
+    """
+
+    if not Path(output_filename).exists():
+        return False, "Y"
+
+    file_exists = True
+
+    if never_overwrite:
+        return file_exists, "O"
+    
+    overwrite = input(
+        f"This file exists already:\n{output_filename}\nAllow overwrite?\nNo (default) (N)\nYes (Y)\nOverwrite all (A)\nNever overwrite (O)\n"
+    ) or "N"
+
+    if overwrite.upper() == "Y":
+        return file_exists, "Y"
+
+    if overwrite.upper() == "N":
+        return file_exists, "N"
+
+    if overwrite.upper() == "A":
+        return file_exists, "A"
+
+    if overwrite.upper() == "O":
+        return file_exists, "O"
+
+    return file_exists, "Y"
+
+
+def process_reorder(source: str, output_filename: str) -> None:
+    """Reorders the pages."""
+
     pdf = PdfReader(source)
     pages = pdf.pages
     pdf_writer = PdfWriter()
@@ -26,12 +66,9 @@ def process_reorder(source, output_filename):
         else:
             previous_page = current_page
 
-    # Write the data to disk
-    # wb overwrite
-    # xb write if not exists
     with open(output_filename, "wb") as out:
         pdf_writer.write(out)
-        print("created", output_filename)
+        print(f"Created file:\n{output_filename}\n")
 
 
 def get_append_name() -> str:
@@ -39,21 +76,21 @@ def get_append_name() -> str:
 
     # multiple file processing
     default_append_name = "-updated"
-    append_name = input(f"Choose value to append to file names.\nThe default value is '{default_append_name}'.\n")
+    append_name = input(f"Choose value to append to file names.\nThe default value is '{default_append_name}'. ")
     append_name = append_name or default_append_name
 
     return append_name
 
 
-def get_output_filename(file_path: str, source: str) -> str:
+def get_output_filename(source: str) -> str:
     """Get name-related values for output files."""
 
-    last_forward_slash = file_path.rfind("/")
-    last_period = file_path.rfind(".")
+    last_forward_slash = source.rfind("/")
+    last_period = source.rfind(".")
     default_output_filename = f"{source[last_forward_slash + 1: last_period]}-updated"
     output_filename = None
 
-    output_filename = input(f"Please input a file name. Do not include the PDF extension.\nDefault value: {default_output_filename}\n")
+    output_filename = input(f"Please input a file name. Do not include the PDF extension.\nDefault value: {default_output_filename} ")
     output_filename = output_filename or default_output_filename
 
     return output_filename
@@ -84,6 +121,8 @@ def main() -> None:
     if len_of_sources > 1:
         append_name = get_append_name()
 
+    always_overwrite = None
+    never_overwrite = None
     for source in sources:
         last_forward_slash = source.rfind("/")
         last_period = source.rfind(".")
@@ -92,10 +131,31 @@ def main() -> None:
         if len_of_sources > 1:
             output_filename = f"{destination}/{source_name}{append_name}.pdf"
         else: 
-            output_filename = get_output_filename()
+            output_filename = get_output_filename(source)
             output_filename = f"{destination}/{output_filename}.pdf"
 
-        process_reorder(source, output_filename)
+        if always_overwrite:
+            process_reorder(source, output_filename)
+            continue
+
+        file_exists, can_overwrite = file_exists_can_be_overwritten(output_filename, never_overwrite)
+
+        if not file_exists:
+            process_reorder(source, output_filename)
+            continue
+
+        if file_exists and (never_overwrite or can_overwrite == "N"):
+            print(f"Skipping file:\n{output_filename}\n")
+            continue
+
+        if file_exists and can_overwrite == "O":
+            never_overwrite = True
+            print(f"Skipping file:\n{output_filename}\n")
+            continue
+
+        if file_exists and can_overwrite == "A":
+            always_overwrite = True
+            process_reorder(source, output_filename)
 
 
 main()
